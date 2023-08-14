@@ -26,8 +26,7 @@ describe("app", () => {
       return request(app)
         .get("/api/topics")
         .expect(200)
-        .then(({ body }) => {
-          const { topics } = body;
+        .then(({ body: { topics } }) => {
           expect(topics).toHaveLength(3);
           topics.forEach((topic) => {
             expect(topic).toHaveProperty("slug", expect.any(String));
@@ -35,6 +34,8 @@ describe("app", () => {
           });
         });
     });
+  });
+  describe("General Error Handling", () => {
     test("404: responds with 404 when given an endpoint that does not exist", () => {
       return request(app).get("/api/biscoff").expect(404);
     });
