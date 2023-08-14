@@ -1,6 +1,7 @@
 const request = require("supertest");
 const app = require("../app");
 const db = require("../db/connection");
+const endpointsJSON = require("../endpoints.json");
 const seed = require("../db/seeds/seed");
 const {
   articleData,
@@ -18,6 +19,19 @@ afterAll(() => {
 });
 
 describe("app", () => {
+  describe("GET /api", () => {
+    test("200: responds with a status of 200", () => {
+      return request(app).get("/api").expect(200);
+    });
+    test("200: responds with an object containing all endpoints usable in the API", () => {
+      return request(app)
+        .get("/api")
+        .expect(200)
+        .then(({ body: { endpoints } }) => {
+          expect(endpoints).toEqual(endpointsJSON);
+        });
+    });
+  });
   describe("GET /api/topics", () => {
     test("200: responds with a status of 200", () => {
       return request(app).get("/api/topics").expect(200);
