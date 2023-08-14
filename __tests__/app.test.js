@@ -49,6 +49,51 @@ describe("app", () => {
         });
     });
   });
+  describe("GET /api/articles/:article_id", () => {
+    test("200: responds with a status of 200", () => {
+      return request(app).get("/api/articles/1").expect(200);
+    });
+    test("200: responds with correct article data for relevant article", () => {
+      return request(app)
+        .get("/api/articles/1")
+        .expect(200)
+        .then(({ body: { article } }) => {
+          expect(article).toHaveProperty("author", expect.any(String));
+          expect(article).toHaveProperty("title", expect.any(String));
+          expect(article).toHaveProperty("article_id", expect.any(Number));
+          expect(article).toHaveProperty("body", expect.any(String));
+          expect(article).toHaveProperty("topic", expect.any(String));
+          expect(article).toHaveProperty("created_at", expect.any(String));
+          expect(article).toHaveProperty("votes", expect.any(Number));
+          expect(article).toHaveProperty("article_img_url", expect.any(String));
+        });
+    });
+    test("404: responds with 404 and an error message when given an article_id that is valid but does not exist", () => {
+      return request(app)
+        .get("/api/articles/20000")
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe(`Article could not be found.`);
+        });
+    });
+    test("400: responds with 400 and an error message when given an article_id that is invalid", () => {
+      return request(app)
+        .get("/api/articles/hello")
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad Request.");
+        });
+    });
+    test("Endpoint has a relevant description in the 'endpoints.json' file", () => {
+      return request(app)
+        .get("/api")
+        .then(({ body: { endpoints } }) => {
+          console.log(endpoints);
+          expect(endpoints).toHaveProperty("GET /api/articles/:article_id");
+        });
+    });
+  });
+
   describe("General Error Handling", () => {
     test("404: responds with 404 when given an endpoint that does not exist", () => {
       return request(app).get("/api/biscoff").expect(404);
