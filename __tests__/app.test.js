@@ -18,6 +18,26 @@ afterAll(() => {
 });
 
 describe("app", () => {
+  describe("GET /api", () => {
+    test("200: responds with a status of 200", () => {
+      return request(app).get("/api").expect(200);
+    });
+    test("200: responds with an object containing all endpoints usable in the API", () => {
+      return request(app)
+        .get("/api")
+        .expect(200)
+        .then(({ body: { endpoints } }) => {
+          const endpointsList = [
+            "GET /api",
+            "GET /api/topics",
+            "GET /api/articles",
+          ];
+          endpointsList.forEach((endpoint) => {
+            expect(endpoints).toHaveProperty(endpoint);
+          });
+        });
+    });
+  });
   describe("GET /api/topics", () => {
     test("200: responds with a status of 200", () => {
       return request(app).get("/api/topics").expect(200);
