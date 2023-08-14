@@ -1,6 +1,7 @@
 const request = require("supertest");
 const app = require("../app");
 const db = require("../db/connection");
+const endpointsJSON = require("../endpoints.json");
 const seed = require("../db/seeds/seed");
 const {
   articleData,
@@ -27,14 +28,7 @@ describe("app", () => {
         .get("/api")
         .expect(200)
         .then(({ body: { endpoints } }) => {
-          const endpointsList = [
-            "GET /api",
-            "GET /api/topics",
-            "GET /api/articles",
-          ];
-          endpointsList.forEach((endpoint) => {
-            expect(endpoints).toHaveProperty(endpoint);
-          });
+          expect(endpoints).toEqual(endpointsJSON);
         });
     });
   });
