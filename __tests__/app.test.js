@@ -93,7 +93,49 @@ describe("app", () => {
     });
   });
 
-  describe("General Error Handling", () => {
+  describe("GET /api/articles", () => {
+    test("200: responds with a 200 status code", () => {
+      return request(app).get("/api/articles").expect(200);
+    });
+    test("200: responds with correct article data for all articles", () => {
+      return request(app)
+        .get("/api/articles")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          articles.forEach((article) => {
+            expect(article).toHaveProperty("author", expect.any(String));
+            expect(article).toHaveProperty("title", expect.any(String));
+            expect(article).toHaveProperty("article_id", expect.any(Number));
+            expect(article).toHaveProperty("topic", expect.any(String));
+            expect(article).toHaveProperty("created_at", expect.any(String));
+            expect(article).toHaveProperty("votes", expect.any(Number));
+            expect(article).toHaveProperty(
+              "article_img_url",
+              expect.any(String)
+            );
+            expect(article).toHaveProperty("comment_count", expect.any(Number));
+            expect(article).not.toHaveProperty("body");
+          });
+        });
+    });
+    test("200: responds with article data sorted by date in descending order", () => {
+      return request(app)
+        .get("/api/articles")
+        .expect(200)
+        .then(({ body: { articles } }) => {
+          expect(articles).toBeSortedBy("created_at", { descending: true });
+        });
+    });
+    test("Endpoint has a relevant description in the 'endpoints.json' file", () => {
+      return request(app)
+        .get("/api")
+        .then(({ body: { endpoints } }) => {
+          expect(endpoints).toHaveProperty("GET /api/articles");
+        });
+    });
+  });
+
+  describe("ALL error handling", () => {
     test("404: responds with 404 when given an endpoint that does not exist", () => {
       return request(app).get("/api/biscoff").expect(404);
     });
