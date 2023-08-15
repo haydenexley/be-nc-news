@@ -88,7 +88,6 @@ describe("app", () => {
       return request(app)
         .get("/api")
         .then(({ body: { endpoints } }) => {
-          console.log(endpoints);
           expect(endpoints).toHaveProperty("GET /api/articles/:article_id");
         });
     });
