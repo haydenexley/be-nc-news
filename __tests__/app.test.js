@@ -81,7 +81,7 @@ describe("app", () => {
         .get("/api/articles/hello")
         .expect(400)
         .then(({ body: { msg } }) => {
-          expect(msg).toBe("Bad Request.");
+          expect(msg).toBe("Bad request.");
         });
     });
     test("Endpoint has a relevant description in the 'endpoints.json' file", () => {
@@ -135,10 +135,7 @@ describe("app", () => {
     });
   });
   describe("GET /api/articles/:article_id/comments", () => {
-    test("200: responds with 200 status code", () => {
-      return request(app).get("/api/articles/1/comments").expect(200);
-    });
-    test("200: responds with correct comment data for all comments relevant to the given article id", () => {
+    test("200: responds with 200 status code and correct comment data for all comments relevant to the given article id", () => {
       return request(app)
         .get("/api/articles/1/comments")
         .expect(200)
@@ -175,6 +172,14 @@ describe("app", () => {
         .expect(404)
         .then(({ body: { msg } }) => {
           expect(msg).toBe("Not found.");
+        });
+    });
+    test("400: responds with 400 and an error message when the article_id given is invalid", () => {
+      return request(app)
+        .get("/api/articles/hello/comments")
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request.");
         });
     });
     test("Endpoint has a relevant description in the 'endpoints.json' file", () => {
