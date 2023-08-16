@@ -192,6 +192,79 @@ describe("app", () => {
         });
     });
   });
+  describe("POST /api/articles/:article_id/comments", () => {
+    test("201: responds with 201 status code and returns the comment provided by the user", () => {
+      const newComment = { username: "rogersop", body: "cool stuff!" };
+      return request(app)
+        .post("/api/articles/2/comments")
+        .send(newComment)
+        .expect(201)
+        .then(({ body: { comment } }) => {
+          expect(comment[0]).toHaveProperty("comment_id", 19);
+          expect(comment[0]).toHaveProperty("body", "cool stuff!");
+          expect(comment[0]).toHaveProperty("article_id", 2);
+          expect(comment[0]).toHaveProperty("author", "rogersop");
+          expect(comment[0]).toHaveProperty("votes", 0);
+          expect(comment[0]).toHaveProperty("created_at", expect.any(String));
+        });
+    });
+    test("201: ignores unneccesarry properties", () => {
+      const newComment = {
+        username: "rogersop",
+        body: "cool stuff!",
+        dontAdd: "do not add me!",
+      };
+      return request(app)
+        .post("/api/articles/2/comments")
+        .send(newComment)
+        .expect(201)
+        .then(({ body: { comment } }) => {
+          expect(comment[0]).toHaveProperty("comment_id", 19);
+          expect(comment[0]).toHaveProperty("body", "cool stuff!");
+          expect(comment[0]).toHaveProperty("article_id", 2);
+          expect(comment[0]).toHaveProperty("author", "rogersop");
+          expect(comment[0]).toHaveProperty("votes", 0);
+          expect(comment[0]).toHaveProperty("created_at", expect.any(String));
+          expect(comment[0]).not.toHaveProperty("dontAdd");
+        });
+    });
+    test("400: responds with bad request if given no data to post", () => {
+      const newComment = {};
+      return request(app)
+        .post("/api/articles/3/comments")
+        .send(newComment)
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request.");
+        });
+    });
+    test("400: responds with bad request if given invalid article id", () => {
+      const newComment = {
+        username: "rogersop",
+        body: "cool stuff!",
+      };
+      return request(app)
+        .post("/api/articles/cheese/comments")
+        .send(newComment)
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request.");
+        });
+    });
+    test("404: responds with not found if posting a comment to an article that does not exist", () => {
+      const newComment = {
+        username: "rogersop",
+        body: "This article doesn't exist!",
+      };
+      return request(app)
+        .post("/api/articles/3000/comments")
+        .send(newComment)
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Not found.");
+        });
+    });
+  });
 
   describe("ALL error handling", () => {
     test("404: responds with 404 when given an endpoint that does not exist", () => {
