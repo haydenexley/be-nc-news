@@ -208,10 +208,43 @@ describe("app", () => {
           expect(comment[0]).toHaveProperty("created_at", expect.any(String));
         });
     });
+    test("201: ignores unneccesarry properties", () => {
+      const newComment = {
+        username: "rogersop",
+        body: "cool stuff!",
+        dontAdd: "do not add me!",
+      };
+      return request(app)
+        .post("/api/articles/2/comments")
+        .send(newComment)
+        .expect(201)
+        .then(({ body: { comment } }) => {
+          expect(comment[0]).toHaveProperty("comment_id", 19);
+          expect(comment[0]).toHaveProperty("body", "cool stuff!");
+          expect(comment[0]).toHaveProperty("article_id", 2);
+          expect(comment[0]).toHaveProperty("author", "rogersop");
+          expect(comment[0]).toHaveProperty("votes", 0);
+          expect(comment[0]).toHaveProperty("created_at", expect.any(String));
+          expect(comment[0]).not.toHaveProperty("dontAdd");
+        });
+    });
     test("400: responds with bad request if given no data to post", () => {
       const newComment = {};
       return request(app)
         .post("/api/articles/3/comments")
+        .send(newComment)
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request.");
+        });
+    });
+    test("400: responds with bad request if given invalid article id", () => {
+      const newComment = {
+        username: "rogersop",
+        body: "cool stuff!",
+      };
+      return request(app)
+        .post("/api/articles/cheese/comments")
         .send(newComment)
         .expect(400)
         .then(({ body: { msg } }) => {
