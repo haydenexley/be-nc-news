@@ -11,6 +11,7 @@ const {
   getArticleComments,
   patchVotes,
 } = require("./controllers/articles.controller");
+const { postComment } = require("./controllers/comments.controller");
 
 const app = express();
 app.use(express.json());
@@ -24,6 +25,8 @@ app.get("/api/articles/:article_id", getArticlesById);
 app.get("/api/articles", getArticles);
 
 app.get("/api/articles/:article_id/comments", getArticleComments);
+
+app.post("/api/articles/:article_id/comments", postComment);
 
 app.patch("/api/articles/:article_id", patchVotes);
 
