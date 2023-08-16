@@ -9,9 +9,11 @@ const {
   getArticlesById,
   getArticles,
   getArticleComments,
+  patchVotes,
 } = require("./controllers/articles.controller");
 
 const app = express();
+app.use(express.json());
 
 app.get("/api", getApi);
 
@@ -22,6 +24,8 @@ app.get("/api/articles/:article_id", getArticlesById);
 app.get("/api/articles", getArticles);
 
 app.get("/api/articles/:article_id/comments", getArticleComments);
+
+app.patch("/api/articles/:article_id", patchVotes);
 
 app.use(handleCustomErrors);
 app.use(handleErrors);

@@ -192,6 +192,91 @@ describe("app", () => {
         });
     });
   });
+  describe("PATCH /api/articles/:article_id", () => {
+    test("200: responds with 200 status code and responds with the article provided", () => {
+      const patchVote = { inc_votes: 0 };
+      return request(app)
+        .patch("/api/articles/2")
+        .send(patchVote)
+        .expect(200)
+        .then(({ body: { article } }) => {
+          expect(article[0]).toHaveProperty("article_id", 2);
+          expect(article[0]).toHaveProperty("title", expect.any(String));
+          expect(article[0]).toHaveProperty("topic", expect.any(String));
+          expect(article[0]).toHaveProperty("author", expect.any(String));
+          expect(article[0]).toHaveProperty("body", expect.any(String));
+          expect(article[0]).toHaveProperty("created_at", expect.any(String));
+          expect(article[0]).toHaveProperty("votes", expect.any(Number));
+          expect(article[0]).toHaveProperty(
+            "article_img_url",
+            expect.any(String)
+          );
+        });
+    });
+    test("200: updates the votes for the relevant article according to the number of votes given if votes are a positive integer", () => {
+      const patchVote = { inc_votes: 2 };
+      return request(app)
+        .patch("/api/articles/2")
+        .send(patchVote)
+        .expect(200)
+        .then(({ body: { article } }) => {
+          const { votes } = article[0];
+          expect(votes).toBe(2);
+        });
+    });
+    test("200: updates the votes for the relevant article according to the number of votes given if votes are a negative integer", () => {
+      const patchVote = { inc_votes: -30 };
+      return request(app)
+        .patch("/api/articles/1")
+        .send(patchVote)
+        .expect(200)
+        .then(({ body: { article } }) => {
+          const { votes } = article[0];
+          expect(votes).toBe(70);
+        });
+    });
+    test("200: updates the votes for the relevant article according to the number of votes given and ignores unneccesary properties", () => {
+      const patchVote = { inc_votes: 1, breakfast: "croissant" };
+      return request(app)
+        .patch("/api/articles/1")
+        .send(patchVote)
+        .expect(200)
+        .then(({ body: { article } }) => {
+          const { votes } = article[0];
+          expect(votes).toBe(101);
+        });
+    });
+    test("404: returns 404 and not found when given an article id that does not exist", () => {
+      const patchVote = { inc_votes: 1 };
+      return request(app)
+        .patch("/api/articles/3000")
+        .send(patchVote)
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Not found.");
+        });
+    });
+    test("400: returns 400 and bad request when given an article id that isn't in the correct format", () => {
+      const patchVote = { inc_votes: 1 };
+      return request(app)
+        .patch("/api/articles/cheese")
+        .send(patchVote)
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request.");
+        });
+    });
+    test("400: returns 400 and bad request when patching with an object that contains no data", () => {
+      const patchVote = {};
+      return request(app)
+        .patch("/api/articles/2")
+        .send(patchVote)
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request.");
+        });
+    });
+  });
 
   describe("ALL error handling", () => {
     test("404: responds with 404 when given an endpoint that does not exist", () => {

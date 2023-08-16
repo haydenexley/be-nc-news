@@ -80,3 +80,15 @@ ORDER BY comments.created_at DESC;
       return rows;
     });
 };
+
+exports.updateVotes = (inc_votes, article_id) => {
+  const queryString = `
+UPDATE articles
+SET    votes = votes            + $1
+WHERE  article_id = $2 returning *; 
+    `;
+  const values = [inc_votes, article_id];
+  return db.query(queryString, values).then(({ rows }) => {
+    return rows;
+  });
+};
