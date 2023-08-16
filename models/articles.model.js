@@ -89,6 +89,6 @@ WHERE  article_id = $2 returning *;
     `;
   const values = [inc_votes, article_id];
   return db.query(queryString, values).then(({ rows }) => {
-    return rows;
+    return rows[0];
   });
 };
