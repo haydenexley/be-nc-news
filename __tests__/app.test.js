@@ -404,7 +404,6 @@ describe("app", () => {
           expect(users.length).toBe(4);
         });
     });
-    test("should ", () => {});
   });
 
   describe("ALL error handling", () => {
