@@ -266,6 +266,42 @@ describe("app", () => {
     });
   });
 
+  describe("DELETE /api/comments/:comment_id", () => {
+    test("204: returns 204 and a blank response", () => {
+      return request(app)
+        .delete("/api/comments/1")
+        .expect(204)
+        .then(({ body }) => {
+          expect(body).toEqual({});
+        });
+    });
+    test("204: comment is deleted from the database", () => {
+      return request(app)
+        .delete("/api/comments/1")
+        .then(() => {
+          return db.query("SELECT * FROM comments;").then(({ rows }) => {
+            expect(rows).toHaveLength(17);
+          });
+        });
+    });
+    test("404: responds with 404 when given a comment to delete that does not exist", () => {
+      return request(app)
+        .delete("/api/comments/1000")
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Not found.");
+        });
+    });
+    test("400: responds with 400 when given a non-integer value for comment_id", () => {
+      return request(app)
+        .delete("/api/comments/cheese")
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request.");
+        });
+    });
+  });
+
   describe("ALL error handling", () => {
     test("404: responds with 404 when given an endpoint that does not exist", () => {
       return request(app).get("/api/biscoff").expect(404);

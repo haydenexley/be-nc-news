@@ -14,3 +14,12 @@ exports.insertComment = (newComment, article_id) => {
     return rows;
   });
 };
+
+exports.removeComment = (comment_id) => {
+  const queryString = `
+DELETE FROM comments
+WHERE comment_id = $1
+  `;
+  const values = [comment_id];
+  return db.query(queryString, values);
+};
