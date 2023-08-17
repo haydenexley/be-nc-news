@@ -359,21 +359,16 @@ describe("app", () => {
         expect(msg).toBe("Bad request.");
       });
   });
-    describe("DELETE /api/comments/:comment_id", () => {
+  describe("DELETE /api/comments/:comment_id", () => {
     test("204: returns 204 and a blank response", () => {
-      return request(app)
-        .delete("/api/comments/1")
-        .expect(204)
-        .then(({ body }) => {
-          expect(body).toEqual({});
-        });
+      return request(app).delete("/api/comments/1").expect(204);
     });
     test("204: comment is deleted from the database", () => {
       return request(app)
         .delete("/api/comments/1")
         .then(() => {
-          return db.query("SELECT * FROM comments;").then(({ rows }) => {
-            expect(rows).toHaveLength(17);
+          return db.query("SELECT COUNT(*) FROM comments;").then(({ rows }) => {
+            expect(rows[0]["count"]).toEqual("17");
           });
         });
     });
