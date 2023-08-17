@@ -390,6 +390,23 @@ describe("app", () => {
     });
   });
 
+  describe("GET /api/users", () => {
+    test("200: returns 200 and an object containing usernames, names and avatar_urls of all users", () => {
+      return request(app)
+        .get("/api/users")
+        .expect(200)
+        .then(({ body: { users } }) => {
+          users.forEach((user) => {
+            expect(user).toHaveProperty("username", expect.any(String));
+            expect(user).toHaveProperty("name", expect.any(String));
+            expect(user).toHaveProperty("avatar_url", expect.any(String));
+          });
+          expect(users.length).toBe(4);
+        });
+    });
+    test("should ", () => {});
+  });
+
   describe("ALL error handling", () => {
     test("404: responds with 404 when given an endpoint that does not exist", () => {
       return request(app).get("/api/biscoff").expect(404);
