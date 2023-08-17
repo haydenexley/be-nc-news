@@ -4,6 +4,7 @@ const {
   selectArticles,
   selectArticleComments,
   updateVotes,
+  selectArticleQueries,
 } = require("../models/articles.model");
 
 exports.getArticlesById = (request, response, next) => {
@@ -16,11 +17,25 @@ exports.getArticlesById = (request, response, next) => {
 };
 
 exports.getArticles = (request, response, next) => {
-  selectArticles()
-    .then((articles) => {
-      response.status(200).send({ articles });
-    })
-    .catch(next);
+  const { topic, sort_by, order } = request.query;
+  if (topic) {
+    const promises = [
+      selectArticleQueries(topic, sort_by, order),
+      checkExists("articles", "topic", topic),
+    ];
+    Promise.all(promises)
+      .then((resolvedPromises) => {
+        const articles = resolvedPromises[0];
+        response.status(200).send({ articles });
+      })
+      .catch(next);
+  } else {
+    selectArticles(sort_by, order)
+      .then((articles) => {
+        response.status(200).send({ articles });
+      })
+      .catch(next);
+  }
 };
 
 exports.getArticleComments = (request, response, next) => {

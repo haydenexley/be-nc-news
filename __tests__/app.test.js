@@ -410,4 +410,93 @@ describe("app", () => {
         });
     });
   });
+
+  describe("GET /api/articles QUERIES", () => {
+    describe("GET /api/articles?=topic", () => {
+      test("200: returns all articles with relevant topic", () => {
+        return request(app)
+          .get("/api/articles?topic=cats")
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            console.log(articles);
+          });
+      });
+      test("404: responds with 404 when topic given does not exist", () => {
+        return request(app)
+          .get("/api/articles?topic=cheese")
+          .expect(404)
+          .then(({ body: { msg } }) => {
+            expect(msg).toBe("Not found.");
+          });
+      });
+    });
+    describe("GET /api/articles?=sort_by", () => {
+      test("200: returns correctly sorted data when given a sort by value", () => {
+        return request(app)
+          .get("/api/articles?sort_by=article_id")
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles).toBeSortedBy("article_id", { descending: true });
+          });
+      });
+      test("400: returns 400 when given a sort_by value that is incorrect", () => {
+        return request(app)
+          .get("/api/articles?sort_by=cheese")
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).toBe("Bad request.");
+          });
+      });
+    });
+    describe("GET /api/articles?=order", () => {
+      test("200: returns correctly sorted data when given a sort by value", () => {
+        return request(app)
+          .get("/api/articles?order=asc")
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles).toBeSortedBy("created_at", { descending: false });
+          });
+      });
+      test("400: returns 400 when given a sort_by value that is incorrect", () => {
+        return request(app)
+          .get("/api/articles?order=cheese")
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).toBe("Bad request.");
+          });
+      });
+    });
+    describe("GET /api/articles QUERIES chaining", () => {
+      test("200: returns correctly sorted data when given an order value and a topic", () => {
+        return request(app)
+          .get("/api/articles?order=asc&topic=mitch")
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles).toBeSortedBy("created_at", { descending: false });
+            articles.forEach((article) =>
+              expect(article).toHaveProperty("topic", "mitch")
+            );
+          });
+      });
+      test("200: returns correctly sorted data when given an order,topic and sort_by", () => {
+        return request(app)
+          .get("/api/articles?order=asc&topic=mitch&sort_by=article_id")
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles).toBeSortedBy("article_id", { descending: false });
+            articles.forEach((article) =>
+              expect(article).toHaveProperty("topic", "mitch")
+            );
+          });
+      });
+      test("400: returns 400 when given a order value that is incorrect and a topic value that is incorrect", () => {
+        return request(app)
+          .get("/api/articles?order=cheese&topic=coolstuff")
+          .expect(400)
+          .then(({ body: { msg } }) => {
+            expect(msg).toBe("Bad request.");
+          });
+      });
+    });
+  });
 });
