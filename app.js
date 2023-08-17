@@ -9,6 +9,7 @@ const {
   getArticlesById,
   getArticles,
   getArticleComments,
+  patchVotes,
 } = require("./controllers/articles.controller");
 const {
   postComment,
@@ -30,11 +31,12 @@ app.get("/api/articles/:article_id/comments", getArticleComments);
 
 app.post("/api/articles/:article_id/comments", postComment);
 
+app.patch("/api/articles/:article_id", patchVotes);
+
 app.delete("/api/comments/:comment_id", deleteComment);
 
 app.use(handleCustomErrors);
 app.use(handleErrors);
-
 app.use((err, request, response, next) => {
   console.log(err);
   response.status(500).send({ msg: err });
