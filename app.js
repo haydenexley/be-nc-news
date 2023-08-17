@@ -11,7 +11,10 @@ const {
   getArticleComments,
   patchVotes,
 } = require("./controllers/articles.controller");
-const { postComment } = require("./controllers/comments.controller");
+const {
+  postComment,
+  deleteComment,
+} = require("./controllers/comments.controller");
 
 const app = express();
 app.use(express.json());
@@ -30,9 +33,10 @@ app.post("/api/articles/:article_id/comments", postComment);
 
 app.patch("/api/articles/:article_id", patchVotes);
 
+app.delete("/api/comments/:comment_id", deleteComment);
+
 app.use(handleCustomErrors);
 app.use(handleErrors);
-
 app.use((err, request, response, next) => {
   console.log(err);
   response.status(500).send({ msg: err });
