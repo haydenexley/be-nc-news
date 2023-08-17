@@ -19,6 +19,11 @@ afterAll(() => {
 });
 
 describe("app", () => {
+  describe("ALL error handling", () => {
+    test("404: responds with 404 when given an endpoint that does not exist", () => {
+      return request(app).get("/api/biscoff").expect(404);
+    });
+  });
   describe("GET /api", () => {
     test("200: responds with a status of 200", () => {
       return request(app).get("/api").expect(200);
@@ -396,19 +401,13 @@ describe("app", () => {
         .get("/api/users")
         .expect(200)
         .then(({ body: { users } }) => {
+          expect(users.length).toBe(4);
           users.forEach((user) => {
             expect(user).toHaveProperty("username", expect.any(String));
             expect(user).toHaveProperty("name", expect.any(String));
             expect(user).toHaveProperty("avatar_url", expect.any(String));
           });
-          expect(users.length).toBe(4);
         });
-    });
-  });
-
-  describe("ALL error handling", () => {
-    test("404: responds with 404 when given an endpoint that does not exist", () => {
-      return request(app).get("/api/biscoff").expect(404);
     });
   });
 });
