@@ -11,6 +11,6 @@ exports.insertComment = (newComment, article_id) => {
     `;
   const values = [body, username, article_id];
   return db.query(queryString, values).then(({ rows }) => {
-    return rows;
+    return rows[0];
   });
 };

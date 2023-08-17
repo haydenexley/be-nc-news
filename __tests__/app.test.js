@@ -192,6 +192,7 @@ describe("app", () => {
         });
     });
   });
+
   describe("POST /api/articles/:article_id/comments", () => {
     test("201: responds with 201 status code and returns the comment provided by the user", () => {
       const newComment = { username: "rogersop", body: "cool stuff!" };
@@ -200,12 +201,12 @@ describe("app", () => {
         .send(newComment)
         .expect(201)
         .then(({ body: { comment } }) => {
-          expect(comment[0]).toHaveProperty("comment_id", 19);
-          expect(comment[0]).toHaveProperty("body", "cool stuff!");
-          expect(comment[0]).toHaveProperty("article_id", 2);
-          expect(comment[0]).toHaveProperty("author", "rogersop");
-          expect(comment[0]).toHaveProperty("votes", 0);
-          expect(comment[0]).toHaveProperty("created_at", expect.any(String));
+          expect(comment).toHaveProperty("comment_id", 19);
+          expect(comment).toHaveProperty("body", "cool stuff!");
+          expect(comment).toHaveProperty("article_id", 2);
+          expect(comment).toHaveProperty("author", "rogersop");
+          expect(comment).toHaveProperty("votes", 0);
+          expect(comment).toHaveProperty("created_at", expect.any(String));
         });
     });
     test("201: ignores unneccesarry properties", () => {
@@ -219,13 +220,13 @@ describe("app", () => {
         .send(newComment)
         .expect(201)
         .then(({ body: { comment } }) => {
-          expect(comment[0]).toHaveProperty("comment_id", 19);
-          expect(comment[0]).toHaveProperty("body", "cool stuff!");
-          expect(comment[0]).toHaveProperty("article_id", 2);
-          expect(comment[0]).toHaveProperty("author", "rogersop");
-          expect(comment[0]).toHaveProperty("votes", 0);
-          expect(comment[0]).toHaveProperty("created_at", expect.any(String));
-          expect(comment[0]).not.toHaveProperty("dontAdd");
+          expect(comment).toHaveProperty("comment_id", 19);
+          expect(comment).toHaveProperty("body", "cool stuff!");
+          expect(comment).toHaveProperty("article_id", 2);
+          expect(comment).toHaveProperty("author", "rogersop");
+          expect(comment).toHaveProperty("votes", 0);
+          expect(comment).toHaveProperty("created_at", expect.any(String));
+          expect(comment).not.toHaveProperty("dontAdd");
         });
     });
     test("400: responds with bad request if given no data to post", () => {
@@ -264,6 +265,99 @@ describe("app", () => {
           expect(msg).toBe("Not found.");
         });
     });
+  });
+
+  describe("PATCH /api/articles/:article_id", () => {
+    test("200: responds with 200 status code and responds with the article provided", () => {
+      const patchVote = { inc_votes: 0 };
+      return request(app)
+        .patch("/api/articles/2")
+        .send(patchVote)
+        .expect(200)
+        .then(({ body: { article } }) => {
+          expect(article).toHaveProperty("article_id", 2);
+          expect(article).toHaveProperty("title", expect.any(String));
+          expect(article).toHaveProperty("topic", expect.any(String));
+          expect(article).toHaveProperty("author", expect.any(String));
+          expect(article).toHaveProperty("body", expect.any(String));
+          expect(article).toHaveProperty("created_at", expect.any(String));
+          expect(article).toHaveProperty("votes", expect.any(Number));
+          expect(article).toHaveProperty("article_img_url", expect.any(String));
+        });
+    });
+    test("200: updates the votes for the relevant article according to the number of votes given if votes are a positive integer", () => {
+      const patchVote = { inc_votes: 2 };
+      return request(app)
+        .patch("/api/articles/2")
+        .send(patchVote)
+        .expect(200)
+        .then(({ body: { article } }) => {
+          const { votes } = article;
+          expect(votes).toBe(2);
+        });
+    });
+    test("200: updates the votes for the relevant article according to the number of votes given if votes are a negative integer", () => {
+      const patchVote = { inc_votes: -30 };
+      return request(app)
+        .patch("/api/articles/1")
+        .send(patchVote)
+        .expect(200)
+        .then(({ body: { article } }) => {
+          const { votes } = article;
+          expect(votes).toBe(70);
+        });
+    });
+    test("200: updates the votes for the relevant article according to the number of votes given and ignores unneccesary properties", () => {
+      const patchVote = { inc_votes: 1, breakfast: "croissant" };
+      return request(app)
+        .patch("/api/articles/1")
+        .send(patchVote)
+        .expect(200)
+        .then(({ body: { article } }) => {
+          const { votes } = article;
+          expect(votes).toBe(101);
+        });
+    });
+    test("404: returns 404 and not found when given an article id that does not exist", () => {
+      const patchVote = { inc_votes: 1 };
+      return request(app)
+        .patch("/api/articles/3000")
+        .send(patchVote)
+        .expect(404)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Not found.");
+        });
+    });
+    test("400: returns 400 and bad request when given an article id that isn't in the correct format", () => {
+      const patchVote = { inc_votes: 1 };
+      return request(app)
+        .patch("/api/articles/cheese")
+        .send(patchVote)
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request.");
+        });
+    });
+    test("400: returns 400 and bad request when patching with an object that contains no data", () => {
+      const patchVote = {};
+      return request(app)
+        .patch("/api/articles/2")
+        .send(patchVote)
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request.");
+        });
+    });
+  });
+  test("400: returns 400 and bad request when inc_votes has a value that is not a number", () => {
+    const patchVote = { inc_votes: "hello" };
+    return request(app)
+      .patch("/api/articles/2")
+      .send(patchVote)
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Bad request.");
+      });
   });
 
   describe("ALL error handling", () => {
