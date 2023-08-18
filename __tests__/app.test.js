@@ -353,17 +353,18 @@ describe("app", () => {
           expect(msg).toBe("Bad request.");
         });
     });
+    test("400: returns 400 and bad request when inc_votes has a value that is not a number", () => {
+      const patchVote = { inc_votes: "hello" };
+      return request(app)
+        .patch("/api/articles/2")
+        .send(patchVote)
+        .expect(400)
+        .then(({ body: { msg } }) => {
+          expect(msg).toBe("Bad request.");
+        });
+    });
   });
-  test("400: returns 400 and bad request when inc_votes has a value that is not a number", () => {
-    const patchVote = { inc_votes: "hello" };
-    return request(app)
-      .patch("/api/articles/2")
-      .send(patchVote)
-      .expect(400)
-      .then(({ body: { msg } }) => {
-        expect(msg).toBe("Bad request.");
-      });
-  });
+
   describe("DELETE /api/comments/:comment_id", () => {
     test("204: returns 204 and a blank response", () => {
       return request(app).delete("/api/comments/1").expect(204);
@@ -509,14 +510,16 @@ describe("app", () => {
             expect(msg).toBe("Bad request.");
           });
       });
-  describe("GET /api/articles/:article_id COMMENT COUNT", () => {
-    test("200: returns comment count for relevant article", () => {
-      return request(app)
-        .get("/api/articles/3")
-        .expect(200)
-        .then(({ body: { article } }) => {
-          expect(article).toHaveProperty("comment_count", 2);
+      describe("GET /api/articles/:article_id COMMENT COUNT", () => {
+        test("200: returns comment count for relevant article", () => {
+          return request(app)
+            .get("/api/articles/3")
+            .expect(200)
+            .then(({ body: { article } }) => {
+              expect(article).toHaveProperty("comment_count", 2);
+            });
         });
+      });
     });
   });
 });
