@@ -418,9 +418,18 @@ describe("app", () => {
           .get("/api/articles?topic=cats")
           .expect(200)
           .then(({ body: { articles } }) => {
+            expect(articles).toHaveLength(1);
             articles.forEach((article) => {
               expect(article).toHaveProperty("topic", "cats");
             });
+          });
+      });
+      test("200: returns 200 when given topic that exists but has no articles", () => {
+        return request(app)
+          .get("/api/articles?topic=paper")
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles).toEqual([]);
           });
       });
       test("404: responds with 404 when topic given does not exist", () => {
@@ -471,9 +480,10 @@ describe("app", () => {
     describe("GET /api/articles QUERIES chaining", () => {
       test("200: returns correctly sorted data when given an order value and a topic", () => {
         return request(app)
-          .get("/api/articles?order=asc&topic=mitch")
+          .get("/api/articles?topic=mitch&order=asc")
           .expect(200)
           .then(({ body: { articles } }) => {
+            expect(articles).toHaveLength(4);
             expect(articles).toBeSortedBy("created_at", { descending: false });
             articles.forEach((article) =>
               expect(article).toHaveProperty("topic", "mitch")
@@ -485,6 +495,7 @@ describe("app", () => {
           .get("/api/articles?order=asc&topic=mitch&sort_by=article_id")
           .expect(200)
           .then(({ body: { articles } }) => {
+            expect(articles).toHaveLength(4);
             expect(articles).toBeSortedBy("article_id", { descending: false });
             articles.forEach((article) =>
               expect(article).toHaveProperty("topic", "mitch")
