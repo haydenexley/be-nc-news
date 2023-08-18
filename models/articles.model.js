@@ -30,34 +30,50 @@ WHERE  article_id = $1;
     });
 };
 
-exports.selectArticles = () => {
-  return db
-    .query(
-      `
-SELECT articles.author,
-       articles.title,
-       articles.article_id,
-       articles.topic,
-       articles.created_at,
-       articles.votes,
-       articles.article_img_url,
-       Count(*)::INT AS comment_count
+exports.selectArticles = (topic, sort_by = "created_at", order = "desc") => {
+  const allowedSorts = ["title", "article_id", "topic", "created_at", "votes"];
+  const allowedOrders = ["asc", "desc"];
+  if (!allowedSorts.includes(sort_by) || !allowedOrders.includes(order)) {
+    return Promise.reject({ status: 400, msg: "Bad request." });
+  }
+  let queryString = `SELECT articles.author,
+  articles.title,
+  articles.article_id,
+  articles.topic,
+  articles.created_at,
+  articles.votes,
+  articles.article_img_url,
+  Count(*)::INT AS comment_count
 FROM   articles
-       JOIN comments
-         ON articles.article_id = comments.article_id
-GROUP  BY articles.author,
-          articles.title,
-          articles.article_id,
-          articles.topic,
-          articles.created_at,
-          articles.votes,
-          articles.article_img_url
-ORDER BY articles.created_at DESC;
-    `
-    )
-    .then(({ rows }) => {
+  JOIN comments
+    ON articles.article_id = comments.article_id`;
+
+  const topicString = ` WHERE topic = $1 `;
+
+  const endOfString = `    GROUP  BY articles.author,
+     articles.title,
+     articles.article_id,
+     articles.topic,
+     articles.created_at,
+     articles.votes,
+     articles.article_img_url
+ORDER BY ${sort_by} ${order}`;
+
+  if (topic) {
+    return checkExists("topics", "slug", topic)
+      .then(() => {
+        queryString += `${topicString} ${endOfString}`;
+        return db.query(queryString, [topic]);
+      })
+      .then(({ rows }) => {
+        return rows;
+      });
+  } else {
+    queryString += ` ${endOfString}`;
+    return db.query(queryString).then(({ rows }) => {
       return rows;
     });
+  }
 };
 
 exports.selectArticleComments = (article_id) => {
