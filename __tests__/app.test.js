@@ -410,7 +410,6 @@ describe("app", () => {
         });
     });
   });
-
   describe("GET /api/articles QUERIES", () => {
     describe("GET /api/articles?=topic", () => {
       test("200: returns all articles with relevant topic", () => {
@@ -510,6 +509,14 @@ describe("app", () => {
             expect(msg).toBe("Bad request.");
           });
       });
+  describe("GET /api/articles/:article_id COMMENT COUNT", () => {
+    test("200: returns comment count for relevant article", () => {
+      return request(app)
+        .get("/api/articles/3")
+        .expect(200)
+        .then(({ body: { article } }) => {
+          expect(article).toHaveProperty("comment_count", 2);
+        });
     });
   });
 });
