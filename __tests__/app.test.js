@@ -418,7 +418,9 @@ describe("app", () => {
           .get("/api/articles?topic=cats")
           .expect(200)
           .then(({ body: { articles } }) => {
-            console.log(articles);
+            articles.forEach((article) => {
+              expect(article).toHaveProperty("topic", "cats");
+            });
           });
       });
       test("404: responds with 404 when topic given does not exist", () => {
