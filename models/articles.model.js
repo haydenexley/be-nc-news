@@ -42,7 +42,14 @@ GROUP  BY articles.author,
 };
 
 exports.selectArticles = (topic, sort_by = "created_at", order = "desc") => {
-  const allowedSorts = ["title", "article_id", "topic", "created_at", "votes"];
+  const allowedSorts = [
+    "title",
+    "article_id",
+    "topic",
+    "created_at",
+    "votes",
+    "comment_count",
+  ];
   const allowedOrders = ["asc", "desc"];
   if (!allowedSorts.includes(sort_by) || !allowedOrders.includes(order)) {
     return Promise.reject({ status: 400, msg: "Bad request." });
